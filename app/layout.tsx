@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SessionProviderWrapper from "./SessionProviderWrapper";
-
+import "./globals.css"; // Import your global CSS file
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className="background-effect"> {/* Add className here */}
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
       </body>
     </html>
