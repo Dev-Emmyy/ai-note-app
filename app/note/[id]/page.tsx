@@ -11,16 +11,18 @@ interface Note {
   createdAt: string;
 }
 
-export default async function NoteDetail({ params }: { params: { id: string } }) {
-  if (params.id === "new") {
-  redirect("/note/new");
-  return null;
-}
+export default async function NoteDetail({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
 
-const res = await fetch(
-  `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/notes/${params.id}`,
-  { cache: "no-store" }
-);
+  if (resolvedParams.id === "new") {
+    redirect("/note/new");
+    return null;
+  }
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/notes/${resolvedParams.id}`,
+    { cache: "no-store" }
+  );
 
   if (!res.ok) {
     return (
