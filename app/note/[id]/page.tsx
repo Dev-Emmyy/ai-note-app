@@ -99,6 +99,7 @@ const res = await fetch(
 
           <Typography variant="h3" sx={{ 
             fontWeight: 700,
+            fontSize: { xs: 18, sm: 20 },
             fontFamily: "Product Sans",
             mb: 1,
             background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
@@ -120,7 +121,6 @@ const res = await fetch(
           p: 3,
           borderRadius: 2,
           bgcolor: 'background.paper',
-          mb: 3
         }}>
           <Typography variant="body1" sx={{ 
             lineHeight: 1.8,
