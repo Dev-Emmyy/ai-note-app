@@ -194,7 +194,7 @@ export default function LoginPage() {
         </Box>
       </Box>
 
-      {/* AI Feature Showcase Section */}
+      {/* AI Feature Showcase Section here */}
       <Box sx={{
         width: '50%',
         minHeight: '100vh',
