@@ -111,8 +111,7 @@ const NotesList = ({ notes }: NotesListProps) => {
               px: 3,
               fontFamily: 'Product sans',
               color: 'text.secondary'
-            }}
-          >
+            }}>
             Cancel
           </Button>
           <Button
@@ -128,14 +127,13 @@ const NotesList = ({ notes }: NotesListProps) => {
               '&:hover': {
                 boxShadow: '0 4px 16px rgba(255,107,107,0.4)'
               }
-            }}
-          >
+            }}>
             {isDeleting ? 'Deleting...' : 'Confirm Delete'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Notes List */}
+      {/* Notes List Cards */}
       <Typography variant="h4" sx={{ 
         mb: 4,
         fontWeight: 700,
