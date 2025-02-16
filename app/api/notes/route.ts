@@ -7,15 +7,26 @@ import { authOptions } from "@/auth";
 
 export async function GET() {
   try {
+    // Get user session
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user || !session.user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Fetch notes belonging only to the logged-in user
     const notes = await prisma.note.findMany({
+      where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
     });
+
     return NextResponse.json(notes, { status: 200 });
   } catch (error) {
     console.error("Error in GET /api/notes:", error);
     return NextResponse.json({ error: "Failed to fetch notes" }, { status: 500 });
   }
 }
+
 
 export async function POST(req: Request) {
   try {
@@ -46,7 +57,7 @@ export async function POST(req: Request) {
         title,
         content,
         createdAt: new Date().toISOString(),
-        user: { connect: { id: session.user.id } },
+        userId: session.user.id,
       },
     });
 
