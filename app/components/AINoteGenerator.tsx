@@ -55,7 +55,7 @@ const AIGenerate = ({ notes }: AIGenerateProps) => {
       <Button
         onClick={handleGenerate}
         variant="contained"
-        sx={{ mt: 2 }}
+        sx={{ mt: 2, fontFamily: 'Product sans' }}
         disabled={isLoading || !prompt.trim()}
       >
         {isLoading ? 'Generating...' : 'Generate'}
@@ -63,7 +63,7 @@ const AIGenerate = ({ notes }: AIGenerateProps) => {
 
       {result && (
         <Box sx={{ mt: 2 }}>
-          <Typography variant="body1" sx={{ fontFamily: "Alkalami"}}>{result}</Typography>
+          <Typography variant="body1" sx={{fontFamily: 'Merriweather'}}>{result}</Typography>
         </Box>
       )}
     </Box>

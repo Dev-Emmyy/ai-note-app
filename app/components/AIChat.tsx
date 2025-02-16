@@ -87,13 +87,14 @@ const AIChat = ({ sx }: { sx?: SxProps<Theme> }) => {
             sx={{
               p: 2,
               mb: 1,
+              fontFamily: 'Merriweather',
               bgcolor: msg.role === "user" ? "grey.100" : "primary.light",
               alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
               maxWidth: "80%",
               ml: msg.role === "ai" ? 0 : "auto",
             }}
           >
-            <Typography variant="body1">{msg.content}</Typography>
+            <Typography variant="body1" sx={{fontFamily: 'Merriweather'}}>{msg.content}</Typography>
           </Paper>
         ))}
         {isLoading && (
@@ -117,7 +118,7 @@ const AIChat = ({ sx }: { sx?: SxProps<Theme> }) => {
       <Button
         onClick={handleSend}
         variant="contained"
-        sx={{ mt: 2 }}
+        sx={{ mt: 2, fontFamily: 'Product sans'}}
         disabled={isLoading || !message.trim()}
       >
         {isLoading ? "Sending..." : "Send"}
