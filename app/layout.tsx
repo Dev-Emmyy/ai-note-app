@@ -20,6 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/appLogo.png?v=2" />
+        <link rel="shortcut icon" href="/appLogo.png?v=2" />
+        <link rel="apple-touch-icon" href="/appLogo.png?v=2" />
+      </head>
       <body className="background-effect"> {/* Add className here */}
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
       </body>
