@@ -6,11 +6,11 @@ export const metadata: Metadata = {
   title: "NeuroNotes",
   description: "Access your AI-powered knowledge base",
   icons: {
-    icon: "/appLogo.png", // Path to your favicon
-    shortcut: "/appLogo.png", // Shortcut icon for browsers
-    apple: "/appLogo.png", // Apple touch icon
+    icon: "/appLogo.png?v=2", // Add ?v=2
+    shortcut: "/appLogo.png?v=2",
+    apple: "/appLogo.png?v=2",
   },
-  manifest: "/manifest.json", // Path to your manifest file
+  manifest: "/manifest.json?v=2",  // Path to your manifest file
 };
 
 export default function RootLayout({
