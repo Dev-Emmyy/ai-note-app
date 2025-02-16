@@ -217,7 +217,7 @@ const NotesList = ({ notes }: NotesListProps) => {
 
                 <Typography variant="body2" sx={{
                   mb: 2,
-                  fontFamily: 'Alkalami',
+                  fontFamily: 'Merriweather',
                   color: 'grey.800',
                   display: '-webkit-box',
                   WebkitLineClamp: 3,
