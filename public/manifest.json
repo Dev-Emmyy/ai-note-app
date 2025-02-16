@@ -3,7 +3,7 @@
   "short_name": "NeuroNotes",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#00000",
+  "background_color": "#000",
   "theme_color": "#FF6F00",
   "icons": [
     {
