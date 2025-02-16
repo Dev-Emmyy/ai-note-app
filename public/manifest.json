@@ -1,0 +1,20 @@
+{
+  "name": "NeuroNotes",
+  "short_name": "NeuroNotes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#00000",
+  "theme_color": "#FF6F00",
+  "icons": [
+    {
+      "src": "/appLogo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/appLogo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

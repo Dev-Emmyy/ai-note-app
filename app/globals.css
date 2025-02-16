@@ -50,32 +50,20 @@ body {
     z-index: -1;
 }
 
-
 @keyframes sparkle {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
+/* Enhanced shine effect */
 @keyframes shine {
-  0% {
-    background-position: 0 0;
-  }
-
-  100% {
-    background-position: 100% 100%;
-  }
+  0% { background-position: 0 0; }
+  100% { background-position: 200% 200%; }
 }
 
 a {
   color: inherit;
   text-decoration: none;
 }
+

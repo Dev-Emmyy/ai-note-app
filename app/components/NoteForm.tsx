@@ -43,7 +43,8 @@ const NoteForm = () => {
           fontWeight: 700,
           background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
           WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
+          WebkitTextFillColor: 'transparent',
+          fontFamily: "Alkalami", 
         }}>
           New Note
         </Typography>
@@ -52,7 +53,8 @@ const NoteForm = () => {
       <Box component="form" onSubmit={handleSubmit} sx={{ 
         display: "flex", 
         flexDirection: "column", 
-        gap: 3 
+        gap: 3,
+        fontFamily: "Product Sans",
       }}>
         <TextField
           label="Title"
@@ -109,6 +111,7 @@ const NoteForm = () => {
           variant="contained"
           startIcon={<AddCircleOutline />}
           sx={{
+            fontFamily: "Product Sans",
             mt: 2,
             py: 1.5,
             borderRadius: 2,

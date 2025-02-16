@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
-) {
+ ) {
   try {
     // Await the params object to access its properties
     const resolvedParams = await params;

@@ -96,7 +96,8 @@ const EditNote = () => {
             mb: 3,
             background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
             WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            WebkitTextFillColor: 'transparent',
+            fontFamily: "Alkalami", 
           }}>
             Edit Note
           </Typography>
@@ -105,7 +106,8 @@ const EditNote = () => {
         <Box component="form" onSubmit={handleUpdate} sx={{ 
           display: "flex", 
           flexDirection: "column", 
-          gap: 3 
+          gap: 3,
+          fontFamily: "Product Sans", 
         }}>
           <TextField
             label="Title"

@@ -17,7 +17,6 @@ export async function GET() {
   }
 }
 
-
 export async function POST(req: Request) {
   try {
     // Get the session
@@ -36,16 +35,17 @@ export async function POST(req: Request) {
     }
 
     const { title, content } = body;
-    if (!title || !content) {
-      console.error("Missing fields. Received:", body);
-      return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
+    if (!title) {
+      console.error("Missing title. Received:", body);
+      return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
 
-    // Create the note associated with the logged-in user
+    // Create the note with default content if empty
     const newNote = await prisma.note.create({
       data: {
         title,
         content,
+        createdAt: new Date().toISOString(),
         user: { connect: { id: session.user.id } },
       },
     });
@@ -58,4 +58,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import { 
   Box, Typography, Grid, Paper, Chip, IconButton, 
   Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
@@ -17,45 +17,41 @@ interface Note {
   color?: string;
 }
 
-const noteColors = [
-  'linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)',
-  'linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)',
-  'linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%)',
-  'linear-gradient(120deg, #f6d365 0%, #fda085 100%)'
-];
 
-const getNoteColor = (id: string) => {
-  const hash = id.split('').reduce((acc, char) => char.charCodeAt(0) + acc, 0);
-  return noteColors[hash % noteColors.length];
-};
+interface NotesListProps {
+  notes: Note[];
+}
 
-const NotesList = () => {
-  const [notes, setNotes] = useState<Note[]>([]);
+const NotesList = ({ notes }: NotesListProps) => {
   const [deleteCandidate, setDeleteCandidate] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
 
-  const fetchNotes = () => {
-    fetch("/api/notes")
-      .then((res) => res.json())
-      .then((data: Note[]) => {
-        const notesWithColors = data.map(note => ({
-          ...note,
-          color: getNoteColor(note.id)
-        }));
-        setNotes(notesWithColors);
-      })
-      .catch(console.error);
+  const getNoteColor = (id: string) => {
+    const colors = [
+      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', // Purple to pink
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', // Blue to teal
+      'linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%)', // Coral to pink
+      'linear-gradient(135deg, #743ad5 0%, #d53a9d 100%)', // Deep purple to magenta
+      'linear-gradient(135deg, #f83600 0%, #f9d423 100%)', // Fiery orange to yellow
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', // Mint to aqua
+      'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)', // Coral to peach
+      'linear-gradient(135deg, #9f7aea 0%, #667eea 100%)', // Lavender to periwinkle
+      'linear-gradient(135deg, #48c6ef 0%, #6f86d6 100%)', // Sky to periwinkle
+      'linear-gradient(135deg, #ff5858 0%, #f09819 100%)', // Red to orange
+      'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)', // Ice to pink
+      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'  // Pink to coral
+    ];
+  const hash = id.split('').reduce((acc, char) => char.charCodeAt(0) + acc, 0);
+    return colors[hash % colors.length];
   };
+
 
   const handleDeleteInit = (id: string) => {
     setDeleteCandidate(id);
   };
 
-  const handleDeleteConfirm = async () => {
+   const handleDeleteConfirm = async () => {
     if (!deleteCandidate) return;
     
     setIsDeleting(true);
@@ -65,7 +61,8 @@ const NotesList = () => {
       });
 
       if (response.ok) {
-        setNotes(notes.filter(note => note.id !== deleteCandidate));
+        // Refresh the page to reflect changes
+        window.location.reload();
       }
     } catch (error) {
       console.error("Delete error:", error);
@@ -74,6 +71,7 @@ const NotesList = () => {
       setDeleteCandidate(null);
     }
   };
+
 
   return (
     <Box sx={{ p: 3 }}>
@@ -93,12 +91,13 @@ const NotesList = () => {
           fontWeight: 700,
           background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
           WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
+          WebkitTextFillColor: 'transparent',
+          fontFamily: 'Product sans',
         }}>
           Confirm Deletion
         </DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ color: 'text.secondary' }}>
+          <DialogContentText sx={{ color: 'text.secondary', fontFamily: 'Product sans', }}>
             Are you sure you want to delete this note? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
@@ -110,6 +109,7 @@ const NotesList = () => {
               borderRadius: 2,
               textTransform: 'none',
               px: 3,
+              fontFamily: 'Product sans',
               color: 'text.secondary'
             }}
           >
@@ -121,6 +121,7 @@ const NotesList = () => {
             disabled={isDeleting}
             sx={{
               borderRadius: 2,
+              fontFamily: 'Product sans',
               textTransform: 'none',
               px: 3,
               background: 'linear-gradient(45deg, #ff6b6b 0%, #ff8787 100%)',
@@ -138,6 +139,7 @@ const NotesList = () => {
       <Typography variant="h4" sx={{ 
         mb: 4,
         fontWeight: 700,
+        fontFamily: 'Product sans',
         color: 'text.primary',
         display: 'flex',
         alignItems: 'center',
@@ -146,6 +148,7 @@ const NotesList = () => {
         Your Notes
         <Chip label={`${notes.length} items`} variant="outlined" sx={{ 
           borderRadius: 1,
+          fontFamily: 'Product sans',
           borderColor: 'primary.main',
           color: 'primary.main'
         }} />
@@ -154,12 +157,12 @@ const NotesList = () => {
       <Grid container spacing={3}>
         {notes.length > 0 ? (
           notes.map((note) => (
-            <Grid item xs={12} sm={6} md={4} key={note.id}>
+            <Grid item xs={12} sm={6} md={4} key={note.id} sx={{ mb: { xs: 5, sm: 0 }}}>
               <Paper elevation={2} sx={{
                 p: 2.5,
                 height: '100%',
                 borderRadius: 3,
-                background: note.color,
+                background: getNoteColor(note.id),
                 transition: 'transform 0.2s, box-shadow 0.2s',
                 position: 'relative',
                 overflow: 'hidden',
@@ -191,9 +194,10 @@ const NotesList = () => {
                     label="Note Management"
                     size="small"
                     sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.3)',
+                      bgcolor: 'rgba(0,0,0, 0.3)',
                       color: 'common.white',
                       fontWeight: 600,
+                      fontFamily: 'Product sans',
                       borderRadius: 1,
                       backdropFilter: 'blur(4px)'
                     }}
@@ -202,6 +206,7 @@ const NotesList = () => {
 
                 <Typography variant="h6" sx={{ 
                   fontWeight: 600,
+                  fontFamily: 'Product sans',
                   mb: 1,
                   color: 'common.black',
                   position: 'relative',
@@ -212,6 +217,7 @@ const NotesList = () => {
 
                 <Typography variant="body2" sx={{
                   mb: 2,
+                  fontFamily: 'Alkalami',
                   color: 'grey.800',
                   display: '-webkit-box',
                   WebkitLineClamp: 3,
@@ -235,6 +241,7 @@ const NotesList = () => {
                 }}>
                   <Typography variant="caption" sx={{ 
                     color: 'rgba(0, 0, 0, 0.6)',
+                    fontFamily: 'Alkalami',
                     fontSize: 12
                   }}>
                     {format(new Date(note.createdAt), "MMM dd, yyyy - HH:mm")}
@@ -272,8 +279,8 @@ const NotesList = () => {
               p: 4,
               color: 'text.secondary'
             }}>
-              <Typography variant="h6">No notes found</Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
+              <Typography variant="h6" sx={{fontFamily: 'Product sans', }}>No notes found</Typography>
+              <Typography variant="body2" sx={{ mt: 1, fontFamily: 'Product sans', }}>
                 Create your first note using the &quot;+&quot; button above
               </Typography>
             </Box>

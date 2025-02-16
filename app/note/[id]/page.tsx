@@ -37,7 +37,7 @@ export default async function NoteDetail({ params }: { params: Promise<{ id: str
           borderRadius: 3,
           textAlign: 'center'
         }}>
-          <Typography variant="h5" sx={{ mb: 2 }}>
+          <Typography variant="h5" sx={{ mb: 2 , fontFamily: "Product Sans", }}>
             Note not found
           </Typography>
           <Link href="/" passHref>
@@ -48,7 +48,8 @@ export default async function NoteDetail({ params }: { params: Promise<{ id: str
                 borderRadius: 2,
                 textTransform: 'none',
                 px: 3,
-                py: 1
+                py: 1,
+                fontFamily: "Product Sans", 
               }}
             >
               Back to Home
@@ -87,7 +88,7 @@ export default async function NoteDetail({ params }: { params: Promise<{ id: str
           </Link>
           
           <Chip
-            label="Product Management"
+            label="Note Management"
             size="medium"
             sx={{
               bgcolor: '#e8f4ff',
@@ -100,6 +101,7 @@ export default async function NoteDetail({ params }: { params: Promise<{ id: str
 
           <Typography variant="h3" sx={{ 
             fontWeight: 700,
+            fontFamily: "Product Sans",
             mb: 1,
             background: 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
             WebkitBackgroundClip: 'text',
@@ -125,7 +127,8 @@ export default async function NoteDetail({ params }: { params: Promise<{ id: str
           <Typography variant="body1" sx={{ 
             lineHeight: 1.8,
             color: 'text.primary',
-            whiteSpace: 'pre-wrap'
+            whiteSpace: 'pre-wrap',
+            fontFamily: 'Alkalami',
           }}>
             {note.content}
           </Typography>
@@ -144,6 +147,7 @@ export default async function NoteDetail({ params }: { params: Promise<{ id: str
               variant="contained"
               startIcon={<Edit />}
               sx={{
+                fontFamily: "Product Sans",
                 borderRadius: 2,
                 px: 3,
                 py: 1,
@@ -163,6 +167,7 @@ export default async function NoteDetail({ params }: { params: Promise<{ id: str
             variant="outlined"
             startIcon={<Delete />}
             sx={{
+              fontFamily: "Product Sans",
               borderRadius: 2,
               px: 3,
               py: 1,
