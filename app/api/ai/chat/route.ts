@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     // Call Cohere API
     const response = await cohere.generate({
       prompt: prompt,
-      maxTokens: 600, // Adjust as needed
+      maxTokens: 10000, // Adjust as needed
     });
 
     // Extract the AI's response

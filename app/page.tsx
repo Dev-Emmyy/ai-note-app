@@ -1,5 +1,5 @@
 'use client';
-import { Box, AppBar, Toolbar, Typography, Button, Tabs, Tab, CircularProgress, useMediaQuery, useTheme } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, Button, Tabs, Tab, CircularProgress} from '@mui/material';
 import { useState, useEffect } from 'react';
 import ExitToApp from '@mui/icons-material/ExitToApp';
 import NotesList from "./components/NotesList";
@@ -18,8 +18,6 @@ interface Note {
 }
 
 export default function Page() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -51,11 +49,7 @@ export default function Page() {
   if (status !== 'authenticated') return null;
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
-      position: 'relative',
-    }}>
-      {/* Header */}
+    <Box sx={{ minHeight: '100vh', position: 'relative' }}>
       <AppBar position="sticky" sx={{ 
         bgcolor: 'rgba(244, 231, 211, 0.7)',
         backdropFilter: 'blur(12px)',
@@ -63,75 +57,174 @@ export default function Page() {
         boxShadow: '0 2px 16px rgba(0,0,0,0.05)',
         color: 'rgba(0,0,0,0.8)'
       }}>
-        <Toolbar sx={{ 
-          px: { xs: 2, sm: 3 },
-          minHeight: { xs: 64, sm: 72 } 
-        }}>
-          <Typography variant="h4" sx={{ 
-            fontFamily: 'Product Sans, sans-serif',
-            fontWeight: 800,
-            background: 'linear-gradient(45deg, #6d28d9 0%, #2563eb 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '-0.5px',
-            fontSize: { xs: '1.5rem', sm: '2rem' }
+        <Toolbar 
+          sx={{ 
+            px: { xs: 2, sm: 3 },
+            minHeight: { xs: 'auto', sm: 72 },
+            flexDirection: { xs: 'column', sm: 'row' },
+            py: { xs: 1, sm: 0 },
+            alignItems: { xs: 'stretch', sm: 'center' },
+            gap: { xs: 2, sm: 3 }
+          }}
+        >
+          {/* Logo and Sign Out Container (mobile only) */}
+          <Box sx={{
+            display: { xs: 'flex', sm: 'none' },
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%'
           }}>
-            NeuroNotes
-          </Typography>
+            <Typography variant="h4" sx={{ 
+              fontFamily: 'Product Sans, sans-serif',
+              fontWeight: 800,
+              background: 'linear-gradient(45deg, #6d28d9 0%, #2563eb 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.5px',
+              fontSize: '1.5rem'
+            }}>
+              NeuroNotes
+            </Typography>
 
-          <Tabs 
-            value={activeTab} 
-            onChange={(_, newValue) => setActiveTab(newValue)}
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-            sx={{ 
-              ml: { xs: 1, sm: 4 },
-              minHeight: 'auto',
-              '& .MuiTab-root': {
-                minWidth: 'auto',
-                px: { xs: 1, sm: 2 },
-                fontSize: { xs: '0.875rem', sm: '1rem' },
-                textTransform: 'none',
-              },
-              '& .MuiTabs-flexContainer': {
-                gap: { xs: 1, sm: 2 },
-              }
-            }}
-          >
-            <Tab label="My Notes" />
-            <Tab label="AI Generator" />
-            <Tab label="AI Chat" />
-          </Tabs>
-
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 2, 
-            ml: 'auto',
-            '& button': {
-              py: { xs: 0.5, sm: 1 }
-            }
-          }}>
             <Button
               variant="outlined"
-              startIcon={!isMobile && <ExitToApp />}
               onClick={() => signOut({ callbackUrl: '/login' })}
               sx={{
                 borderRadius: 3,
                 textTransform: 'none',
-                px: { xs: 2, sm: 3 },
+                px: 2,
                 borderColor: 'divider',
                 color: 'text.primary',
+                minWidth: 0,
                 '&:hover': {
                   borderColor: 'action.selected',
                   backgroundColor: 'action.hover'
                 }
               }}
             >
-              {isMobile ? <ExitToApp /> : 'Sign Out'}
+              <ExitToApp />
             </Button>
           </Box>
+
+          {/* Desktop Left Section (Logo + Tabs) */}
+          <Box sx={{
+            display: { xs: 'none', sm: 'flex' },
+            alignItems: 'center',
+            gap: 3,
+            flex: 1
+          }}>
+            {/* Desktop Logo */}
+            <Typography 
+              variant="h4" 
+              sx={{ 
+                fontFamily: 'Product Sans, sans-serif',
+                fontWeight: 800,
+                background: 'linear-gradient(45deg, #6d28d9 0%, #2563eb 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                letterSpacing: '-0.5px',
+                fontSize: '2rem'
+              }}
+            >
+              NeuroNotes
+            </Typography>
+
+            {/* Tabs for Desktop */}
+            <Tabs 
+              value={activeTab} 
+              onChange={(_, newValue) => setActiveTab(newValue)}
+              variant="standard"
+              sx={{ 
+                minHeight: 'auto',
+                '& .MuiTab-root': {
+                  minWidth: 'auto',
+                  minHeight: '48px',
+                  fontSize: '1rem',
+                  textTransform: 'none',
+                  color: 'text.secondary',
+                  '&.Mui-selected': {
+                    color: 'primary.main',
+                    fontWeight: 600
+                  }
+                },
+                '& .MuiTabs-indicator': {
+                  height: 3,
+                  borderRadius: '3px 3px 0 0',
+                  backgroundColor: 'primary.main'
+                }
+              }}
+            >
+              <Tab label="My Notes" />
+              <Tab label="AI Generator" />
+              <Tab label="AI Chat" />
+            </Tabs>
+          </Box>
+
+          {/* Mobile Tabs */}
+          <Box sx={{ display: { xs: 'block', sm: 'none' }, width: '100%' }}>
+            <Tabs 
+              value={activeTab} 
+              onChange={(_, newValue) => setActiveTab(newValue)}
+              variant="fullWidth"
+              sx={{ 
+                minHeight: 'auto',
+                '& .MuiTab-root': {
+                  minWidth: 'auto',
+                  minHeight: '40px',
+                  fontSize: '0.875rem',
+                  textTransform: 'none',
+                  color: 'text.secondary',
+                  '&.Mui-selected': {
+                    color: 'primary.main',
+                    fontWeight: 600
+                  }
+                },
+                '& .MuiTabs-indicator': {
+                  height: 3,
+                  borderRadius: '3px 3px 0 0',
+                  backgroundColor: 'primary.main'
+                }
+              }}
+            >
+              <Tab 
+                label="My Notes" 
+                icon="📝"
+                iconPosition="start"
+              />
+              <Tab 
+                label="AI Generator" 
+                icon="🤖"
+                iconPosition="start"
+              />
+              <Tab 
+                label="AI Chat" 
+                icon="💭"
+                iconPosition="start"
+              />
+            </Tabs>
+          </Box>
+
+          {/* Desktop Sign Out Button */}
+          <Button
+            variant="outlined"
+            startIcon={<ExitToApp />}
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            sx={{
+              display: { xs: 'none', sm: 'flex' },
+              borderRadius: 3,
+              textTransform: 'none',
+              px: 3,
+              borderColor: 'divider',
+              color: 'text.primary',
+              ml: 'auto',
+              '&:hover': {
+                borderColor: 'action.selected',
+                backgroundColor: 'action.hover'
+              }
+            }}
+          >
+            Sign Out
+          </Button>
         </Toolbar>
       </AppBar>
 
@@ -140,7 +233,7 @@ export default function Page() {
         p: { xs: 2, sm: 4 },
         maxWidth: 1400,
         mx: 'auto',
-        pb: { xs: 8, sm: 4 } // Add bottom padding for mobile floating button
+        pb: { xs: 8, sm: 4 }
       }}>
         {activeTab === 0 && (
           <>

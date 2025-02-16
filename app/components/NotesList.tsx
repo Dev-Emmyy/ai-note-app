@@ -272,15 +272,32 @@ const NotesList = ({ notes }: NotesListProps) => {
             </Grid>
           ))
         ) : (
-          <Grid item xs={12}>
-            <Box sx={{ 
-              width: '100%', 
-              textAlign: 'center', 
-              p: 4,
-              color: 'text.secondary'
-            }}>
-              <Typography variant="h6" sx={{fontFamily: 'Product sans', }}>No notes found</Typography>
-              <Typography variant="body2" sx={{ mt: 1, fontFamily: 'Product sans', }}>
+          <Grid 
+            item 
+            xs={12} 
+            sx={{ 
+              minHeight: '50vh',  // Add minimum height to ensure vertical centering works
+              display: 'flex',    // Make the Grid item itself a flex container
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                textAlign: 'center',
+                p: 4,
+                color: 'text.secondary',
+              }}
+            >
+              <Typography variant="h6" sx={{ fontFamily: 'Product Sans' }}>
+                No notes found
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1, fontFamily: 'Product Sans' }}>
                 Create your first note using the &quot;+&quot; button above
               </Typography>
             </Box>
