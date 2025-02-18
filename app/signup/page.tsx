@@ -8,15 +8,16 @@ import {
   Typography,
   Link,
   InputAdornment,
-  CircularProgress
+  CircularProgress,
+  IconButton
 } from '@mui/material';
-import { Mail, Lock, Person } from '@mui/icons-material';
+import { Mail, Lock, Person, Visibility, VisibilityOff } from '@mui/icons-material';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const getErrorMessage = (error: string): string => {
   const errorMap: { [key: string]: string } = {
-    'EmailExists': 'This email is already registered.',
+    'EmailExists': 'This email is already registered. Please login instead.',
     'WeakPassword': 'Password must be at least 6 characters.',
     'InvalidEmail': 'Please enter a valid email address.',
     'Default': 'An error occurred during registration. Please try again.'
@@ -29,6 +30,7 @@ export default function Signup() {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [formValid, setFormValid] = useState<boolean>(false);
@@ -48,13 +50,13 @@ export default function Signup() {
     setLoading(true);
     setError('');
 
-    try {
+        try {
       const response = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           name: name.trim(), 
-          email: email.trim(), 
+          email: email.trim().toLowerCase(), // Normalize email
           password 
         }),
       });
@@ -68,13 +70,13 @@ export default function Signup() {
       router.push('/login');
     } catch (err: unknown) {
       if (err instanceof Error) {
+        console.error('Registration error:', err.message); // Log the actual error
         setError(getErrorMessage(err.message || 'Default'));
       } else {
         setError(getErrorMessage('Default'));
       }
-    } finally {
-      setLoading(false);
     }
+
   };
 
   return (
@@ -153,33 +155,33 @@ export default function Signup() {
             disabled={loading}
           />
           <TextField
-            fullWidth
-            required
-            label="Email Address"
-            margin="normal"
-            type="email"
-            value={email}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setEmail(e.target.value.trim());
-              setError('');
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Mail sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
-            }}
-            error={!!error}
-            helperText={!emailRegex.test(email) && email.length > 0 && 'Invalid email format'}
-            disabled={loading}
-          />
-          <TextField
+              fullWidth
+              required
+              label="Email Address"
+              margin="normal"
+              type="email"
+              value={email}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setEmail(e.target.value.trim());
+                setError('');
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Mail sx={{ color: 'text.secondary' }} />
+                  </InputAdornment>
+                ),
+              }}
+              error={!!error}
+              helperText={!emailRegex.test(email) && email.length > 0 && 'Invalid email format'}
+              disabled={loading}
+            />
+            <TextField
             fullWidth
             required
             label="Password"
             margin="normal"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setPassword(e.target.value);
@@ -189,6 +191,17 @@ export default function Signup() {
               startAdornment: (
                 <InputAdornment position="start">
                   <Lock sx={{ color: 'text.secondary' }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                    aria-label="toggle password visibility"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
                 </InputAdornment>
               ),
             }}
@@ -212,7 +225,6 @@ export default function Signup() {
             type="submit"
             fullWidth
             variant="contained"
-            disabled={!formValid || loading}
             sx={{
               mt: 3,
               py: 1.5,

@@ -8,14 +8,16 @@ import {
   Typography,
   Link,
   InputAdornment,
-  CircularProgress
+  CircularProgress,
+  IconButton
 } from '@mui/material';
-import { Mail, Lock, AutoAwesome } from '@mui/icons-material';
+import { Mail, Lock, AutoAwesome,  Visibility, VisibilityOff } from '@mui/icons-material';
 import Image from 'next/image';
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -134,12 +136,23 @@ export default function LoginPage() {
                 setError('');
               }}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock sx={{ color: 'text.secondary' }} />
-                  </InputAdornment>
-                ),
-              }}
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Lock sx={{ color: 'text.secondary' }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                    aria-label="toggle password visibility"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
               variant="outlined"
               sx={{ mb: 2 }}
             />
