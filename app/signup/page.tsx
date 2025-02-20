@@ -17,12 +17,12 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const getErrorMessage = (error: string): string => {
   const errorMap: { [key: string]: string } = {
+    'User already exists': 'This email is already registered. Please login instead.', // Match backend error
     'EmailExists': 'This email is already registered. Please login instead.',
     'WeakPassword': 'Password must be at least 6 characters.',
     'InvalidEmail': 'Please enter a valid email address.',
-    'Default': 'An error occurred during registration. Please try again.'
   };
-  return errorMap[error] || errorMap['Default'];
+  return errorMap[error];
 };
 
 export default function Signup() {
@@ -44,40 +44,38 @@ export default function Signup() {
   }, [name, email, password]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!formValid) return;
+  e.preventDefault();
+  if (!formValid) return;
 
-    setLoading(true);
-    setError('');
+  setLoading(true);
+  setError('');
 
-        try {
-      const response = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name: name.trim(), 
-          email: email.trim().toLowerCase(), // Normalize email
-          password 
-        }),
-      });
+  try {
+    const response = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        name: name.trim(), 
+        email: email.trim().toLowerCase(),
+        password 
+      }),
+    });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
-      }
-      
-      router.push('/login');
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error('Registration error:', err.message); // Log the actual error
-        setError(getErrorMessage(err.message || 'Default'));
-      } else {
-        setError(getErrorMessage('Default'));
-      }
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Registration failed');
     }
-
-  };
+    
+    router.push('/login');
+  } catch (err: unknown) {
+    setLoading(false); // Stop loading
+    if (err instanceof Error) {
+      console.error('Registration error:', err.message);
+      setError(getErrorMessage(err.message)); // Pass the actual error message
+    }
+  }
+};
 
   return (
     <Box
