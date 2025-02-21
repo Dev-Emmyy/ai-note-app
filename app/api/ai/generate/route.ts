@@ -1,13 +1,30 @@
+// app/api/ai/generate/route.ts
 import { NextResponse } from 'next/server';
 import { CohereClient } from 'cohere-ai';
 
 const cohere = new CohereClient({
-  token: process.env.COHERE_API_KEY,
+  token: process.env.COHERE_API_KEY || '', // Fallback to empty string if not set
 });
+
+// Define expected request body type
+interface GenerateRequest {
+  prompt: string;
+  context: string;
+  maxTokens?: number; // Optional for future flexibility
+}
+
 
 export async function POST(req: Request) {
   try {
-    const { prompt, context } = await req.json();
+    const body = await req.json() as GenerateRequest;
+    const { prompt, context, maxTokens = 1000 } = body; // Default maxTokens if not provided
+
+    if (!prompt || typeof prompt !== 'string' || !context || typeof context !== 'string') {
+      return NextResponse.json(
+        { error: 'Invalid request: prompt and context must be non-empty strings' },
+        { status: 400 }
+      );
+    }
 
     // Combine context and prompt for Cohere
     const fullPrompt = `Context: ${context}\n\nTask: ${prompt}`;
@@ -15,7 +32,8 @@ export async function POST(req: Request) {
     // Call Cohere API
     const response = await cohere.generate({
       prompt: fullPrompt,
-      maxTokens: 1000, // Adjust as needed
+      maxTokens, // Use client-provided value or default
+      temperature: 0.7, // Optional: adjust creativity (customize as needed)
     });
 
     // Extract the generated text
@@ -35,7 +53,7 @@ export async function POST(req: Request) {
     }
 
     // Return the full result if not truncated
-    return NextResponse.json({ result: generatedText }, { status: 200 });
+    return NextResponse.json({ result: generatedText.trim() }, { status: 200 });
   } catch (error) {
     console.error('Error in Cohere generation:', error);
     return NextResponse.json(
@@ -51,13 +69,10 @@ export async function POST(req: Request) {
  * @returns True if the text appears truncated, false otherwise.
  */
 function detectTruncation(text: string): boolean {
-  // Define patterns that indicate truncation (e.g., incomplete sentences, abrupt endings)
   const truncationPatterns = [
-    /\b\w+$/, // Word cut off mid-sentence
-    /\.$/,    // Single period at the end (could indicate an incomplete sentence)
-    /[\s\n]$/, // Ends with whitespace or newline
+    /\b\w+$/,   // Word cut off mid-sentence
+    /\.$/,      // Single period at the end (could indicate incomplete sentence)
+    /[\s\n]$/,  // Ends with whitespace or newline
   ];
-
-  // Check if any pattern matches
   return truncationPatterns.some((pattern) => pattern.test(text));
 }

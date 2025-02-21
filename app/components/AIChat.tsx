@@ -1,86 +1,63 @@
+// app/components/AIChat.tsx
 "use client";
-import React, { useState } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Paper,
-  Typography,
-  CircularProgress,
-  SxProps,
-  Theme
-} from "@mui/material";
 
+import { useMutation } from '@tanstack/react-query';
+import { useAppStore } from '../../context/notesStore'; // Adjust path
+import { Box, TextField, Button, Paper, Typography, CircularProgress, SxProps, Theme } from '@mui/material';
 
-interface ChatMessage {
-  role: string; // 'user' or 'ai'
-  content: string;
+interface ChatResponse {
+  result: string;
 }
 
+async function sendChatMessage(messages: { role: string; content: string }[]): Promise<ChatResponse> {
+  const response = await fetch('/api/ai/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to get AI response');
+  }
+  return response.json();
+}
 
 const AIChat = ({ sx }: { sx?: SxProps<Theme> }) => {
-  const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const { chatMessage, chatHistory, setChatMessage, addChatMessage, resetChat } = useAppStore();
 
-  const handleSend = async () => {
-    if (!message.trim()) return;
-
-    setIsLoading(true);
-
-    try {
-      // Add user message to chat history
-      const updatedHistory = [
-        ...chatHistory,
-        { role: "user", content: message },
-      ];
-
-      // Call the chat API with a prompt for note-writing ideas
-      const response = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: updatedHistory,
-          context: "Provide creative and concise ideas for writing notes.", // Optional context for note-writing
-        }),
+  const mutation = useMutation({
+    mutationFn: sendChatMessage,
+    onMutate: () => {
+      // Optimistically add user message
+      addChatMessage({ role: 'user', content: chatMessage });
+    },
+    onSuccess: (data) => {
+      // Add AI response
+      addChatMessage({ role: 'ai', content: data.result });
+      setChatMessage(''); // Clear input
+    },
+    onError: (error) => {
+      console.error('Error:', error);
+      addChatMessage({
+        role: 'ai',
+        content: 'Sorry, something went wrong. Please try again or rephrase your request.',
       });
+    },
+  });
 
-      if (!response.ok) {
-        throw new Error("Failed to get AI response");
-      }
+  const handleSend = () => {
+    if (!chatMessage.trim()) return;
+    mutation.mutate([...chatHistory, { role: 'user', content: chatMessage }]);
+  };
 
-      const data = await response.json();
-      const aiResponse = data.result;
-
-      // Add AI response to chat history
-      setChatHistory([
-        ...updatedHistory,
-        { role: "ai", content: aiResponse },
-      ]);
-    } catch (error) {
-      console.error("Error:", error);
-      setChatHistory([
-        ...chatHistory,
-        { role: "user", content: message },
-        {
-          role: "ai",
-          content:
-            "Sorry, something went wrong. Please try again or rephrase your request.",
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-      setMessage("");
-    }
+  const handleReset = () => {
+    resetChat();
   };
 
   return (
-    <Box sx={{ p: 2 ,...sx,
-    '& .MuiTextField-root': {
-      mb: { xs: 1, sm: 2 }
-    } }}>
+    <Box sx={{ p: 2, ...sx, '& .MuiTextField-root': { mb: { xs: 1, sm: 2 } } }}>
       {/* Chat History */}
-      <Box sx={{ mb: 2, maxHeight: "60vh", overflowY: "auto" }}>
+      <Box sx={{ mb: 2, maxHeight: '60vh', overflowY: 'auto' }}>
         {chatHistory.map((msg, i) => (
           <Paper
             key={i}
@@ -88,41 +65,55 @@ const AIChat = ({ sx }: { sx?: SxProps<Theme> }) => {
               p: 2,
               mb: 1,
               fontFamily: 'Merriweather',
-              bgcolor: msg.role === "user" ? "grey.100" : "primary.light",
-              alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-              maxWidth: "80%",
-              ml: msg.role === "ai" ? 0 : "auto",
+              bgcolor: msg.role === 'user' ? 'grey.100' : 'primary.light',
+              alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+              maxWidth: '80%',
+              ml: msg.role === 'ai' ? 0 : 'auto',
             }}
           >
-            <Typography variant="body1" sx={{fontFamily: 'Merriweather'}}>{msg.content}</Typography>
+            <Typography variant="body1" sx={{ fontFamily: 'Merriweather' }}>
+              {msg.content}
+            </Typography>
           </Paper>
         ))}
-        {isLoading && (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        {mutation.isPending && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
             <CircularProgress size={24} />
           </Box>
         )}
       </Box>
 
-      {/* Input Field */}
-      <TextField
-        fullWidth
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Ask me anything... or get note-writing ideas!"
-        onKeyPress={(e) => e.key === "Enter" && handleSend()}
-        disabled={isLoading}
-      />
-
-      {/* Send Button */}
-      <Button
-        onClick={handleSend}
-        variant="contained"
-        sx={{ mt: 2, fontFamily: 'Product sans'}}
-        disabled={isLoading || !message.trim()}
-      >
-        {isLoading ? "Sending..." : "Send"}
-      </Button>
+      {/* Input Field and Buttons */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <TextField
+          fullWidth
+          value={chatMessage}
+          onChange={(e) => setChatMessage(e.target.value)}
+          placeholder="Ask me anything..."
+          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+          disabled={mutation.isPending}
+        />
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            onClick={handleSend}
+            variant="contained"
+            sx={{ fontFamily: 'Product Sans' }}
+            disabled={mutation.isPending || !chatMessage.trim()}
+          >
+            {mutation.isPending ? 'Sending...' : 'Send'}
+          </Button>
+          {chatHistory.length > 0 && (
+            <Button
+              onClick={handleReset}
+              variant="outlined"
+              sx={{ fontFamily: 'Product Sans' }}
+              disabled={mutation.isPending}
+            >
+              Clear Chat
+            </Button>
+          )}
+        </Box>
+      </Box>
     </Box>
   );
 };

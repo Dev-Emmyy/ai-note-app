@@ -1,65 +1,62 @@
+// app/api/ai/chat/route.ts
 import { NextResponse } from 'next/server';
 import { CohereClient } from 'cohere-ai';
 
 const cohere = new CohereClient({
-  token: process.env.COHERE_API_KEY,
+  token: process.env.COHERE_API_KEY || '',
 });
+
+interface ChatRequest {
+  messages: { role: string; content: string }[];
+}
+
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages } = await req.json() as ChatRequest;
 
-    // Prepare the prompt for Cohere
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ error: 'Invalid request: messages array is required' }, { status: 400 });
+    }
+
+    // Format chat history as a conversational prompt
     const prompt = messages
-      .map((msg: { role: string; content: string }) => `${msg.role}: ${msg.content}`)
-      .join('\n');
+      .map((msg) => `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.content}`)
+      .join('\n') + '\nAI:';
 
     // Call Cohere API
     const response = await cohere.generate({
-      prompt: prompt,
-      maxTokens: 10000, // Adjust as needed
+      prompt,
+      maxTokens: 1000, // Reduced for chatting; adjust as needed
+      temperature: 0.7, // Moderate creativity for conversational tone
     });
 
-    // Extract the AI's response
-    const aiResponse = response.generations[0]?.text || '';
+    const aiResponse = response.generations[0]?.text.trim() || '';
 
-    // Check if the response was truncated
+    // Check for truncation
     const isTruncated = detectTruncation(aiResponse);
 
-    // Return the result with a professional message if truncated
     if (isTruncated) {
       return NextResponse.json(
         {
-          result: `${aiResponse.trim()}... Limit reached. The response has been truncated due to the maximum token limit.`,
+          result: `${aiResponse}... (Response truncated due to token limit)`,
         },
         { status: 200 }
       );
     }
 
-    // Return the full result if not truncated
     return NextResponse.json({ result: aiResponse }, { status: 200 });
   } catch (error) {
     console.error('Error in Cohere chat:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate chat response' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to generate chat response' }, { status: 500 });
   }
 }
 
-/**
- * Detects if the generated text is truncated based on common signs of truncation.
- * @param text - The generated text to check.
- * @returns True if the text appears truncated, false otherwise.
- */
 function detectTruncation(text: string): boolean {
-  // Define patterns that indicate truncation (e.g., incomplete sentences, abrupt endings)
   const truncationPatterns = [
-    /\b\w+$/, // Word cut off mid-sentence
-    /\.$/,    // Single period at the end (could indicate an incomplete sentence)
-    /[\s\n]$/, // Ends with whitespace or newline
+    /\b\w+$/,
+    /\.$/,
+    /[\s\n]$/,
   ];
-
-  // Check if any pattern matches
   return truncationPatterns.some((pattern) => pattern.test(text));
 }
