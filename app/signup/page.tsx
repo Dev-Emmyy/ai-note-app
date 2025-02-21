@@ -1,81 +1,79 @@
+// app/signup/page.tsx
 'use client';
-import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
+import { useAppStore } from '../../context/notesStore'; // Adjust path
+import { FormEvent, ChangeEvent } from 'react';
 import {
   Box,
   Button,
+  CircularProgress,
   TextField,
   Typography,
-  Link,
   InputAdornment,
-  CircularProgress,
-  IconButton
+  IconButton,
+  Link as MUILink,
 } from '@mui/material';
-import { Mail, Lock, Person, Visibility, VisibilityOff } from '@mui/icons-material';
+import { Person, Mail, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
+import Link from 'next/link';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const getErrorMessage = (error: string): string => {
   const errorMap: { [key: string]: string } = {
-    'User already exists': 'This email is already registered. Please login instead.', // Match backend error
+    'User already exists': 'This email is already registered. Please login instead.',
     'EmailExists': 'This email is already registered. Please login instead.',
     'WeakPassword': 'Password must be at least 6 characters.',
     'InvalidEmail': 'Please enter a valid email address.',
+    'Default': 'An error occurred during registration. Please try again.',
   };
-  return errorMap[error];
+  return errorMap[error] || errorMap['Default']; // Fallback to 'Default'
 };
+
+async function signupUser({ name, email, password }: { name: string; email: string; password: string }) {
+  const response = await fetch('/api/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Registration failed');
+  return data;
+}
 
 export default function Signup() {
   const router = useRouter();
-  const [name, setName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-  const [formValid, setFormValid] = useState<boolean>(false);
+  const {
+    name,
+    email,
+    password,
+    showPassword,
+    error,
+    setName,
+    setEmail,
+    setPassword,
+    toggleShowPassword,
+    setError,
+    resetAuth,
+  } = useAppStore();
 
-  useEffect(() => {
-    setFormValid(
-      name.trim().length >= 2 &&
-      emailRegex.test(email) &&
-      password.length >= 6
-    );
-  }, [name, email, password]);
+  const mutation = useMutation({
+    mutationFn: signupUser,
+    onSuccess: () => {
+      resetAuth();
+      router.push('/login');
+    },
+    onError: (err: Error) => setError(getErrorMessage(err.message)),
+  });
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  if (!formValid) return;
+  const formValid = name.trim().length >= 2 && emailRegex.test(email) && password.length >= 6;
 
-  setLoading(true);
-  setError('');
-
-  try {
-    const response = await fetch('/api/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        name: name.trim(), 
-        email: email.trim().toLowerCase(),
-        password 
-      }),
-    });
-
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error || 'Registration failed');
-    }
-    
-    router.push('/login');
-  } catch (err: unknown) {
-    setLoading(false); // Stop loading
-    if (err instanceof Error) {
-      console.error('Registration error:', err.message);
-      setError(getErrorMessage(err.message)); // Pass the actual error message
-    }
-  }
-};
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!formValid) return;
+    mutation.mutate({ name: name.trim(), email, password });
+  };
 
   return (
     <Box
@@ -125,12 +123,7 @@ export default function Signup() {
             Join AInote and unlock smart note-taking powered by AI
           </Typography>
         </Box>
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          noValidate
-          aria-labelledby="signupFormTitle"
-        >
+        <Box component="form" onSubmit={handleSubmit} noValidate aria-labelledby="signupFormTitle">
           <TextField
             fullWidth
             required
@@ -150,31 +143,31 @@ export default function Signup() {
             }}
             error={!!error}
             helperText={name.length < 2 && name.length > 0 && 'Minimum 2 characters required'}
-            disabled={loading}
+            disabled={mutation.isPending}
           />
           <TextField
-              fullWidth
-              required
-              label="Email Address"
-              margin="normal"
-              type="email"
-              value={email}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                setEmail(e.target.value.trim());
-                setError('');
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Mail sx={{ color: 'text.secondary' }} />
-                  </InputAdornment>
-                ),
-              }}
-              error={!!error}
-              helperText={!emailRegex.test(email) && email.length > 0 && 'Invalid email format'}
-              disabled={loading}
-            />
-            <TextField
+            fullWidth
+            required
+            label="Email Address"
+            margin="normal"
+            type="email"
+            value={email}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setEmail(e.target.value);
+              setError('');
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Mail sx={{ color: 'text.secondary' }} />
+                </InputAdornment>
+              ),
+            }}
+            error={!!error}
+            helperText={!emailRegex.test(email) && email.length > 0 && 'Invalid email format'}
+            disabled={mutation.isPending}
+          />
+          <TextField
             fullWidth
             required
             label="Password"
@@ -194,7 +187,7 @@ export default function Signup() {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={toggleShowPassword}
                     edge="end"
                     aria-label="toggle password visibility"
                   >
@@ -205,7 +198,7 @@ export default function Signup() {
             }}
             error={!!error}
             helperText={password.length < 6 && password.length > 0 && 'Minimum 6 characters required'}
-            disabled={loading}
+            disabled={mutation.isPending}
             inputProps={{ minLength: 6 }}
           />
           {error && (
@@ -223,6 +216,7 @@ export default function Signup() {
             type="submit"
             fullWidth
             variant="contained"
+            disabled={mutation.isPending || !formValid}
             sx={{
               mt: 3,
               py: 1.5,
@@ -237,15 +231,11 @@ export default function Signup() {
                 boxShadow: '0 8px 24px rgba(63, 81, 181, 0.3)',
               },
               '&.Mui-disabled': {
-                bgcolor: 'action.disabledBackground'
-              }
+                bgcolor: 'action.disabledBackground',
+              },
             }}
           >
-            {loading ? (
-              <CircularProgress size={24} sx={{ color: 'white' }} />
-            ) : (
-              'Create Account'
-            )}
+            {mutation.isPending ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Create Account'}
           </Button>
           <Typography
             variant="body2"
@@ -257,18 +247,17 @@ export default function Signup() {
             }}
           >
             Already have an account?{' '}
-            <Link
-              href="/login"
-              sx={{
-                color: 'primary.main',
-                fontWeight: 600,
-                textDecoration: 'none',
-                '&:hover': {
-                  textDecoration: 'underline',
-                },
-              }}
-            >
-              Log in
+            <Link href="/login" passHref legacyBehavior>
+              <MUILink
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  '&:hover': { textDecoration: 'underline' },
+                }}
+              >
+                Log in
+              </MUILink>
             </Link>
           </Typography>
         </Box>
